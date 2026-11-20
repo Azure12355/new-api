@@ -394,6 +394,11 @@ func genStripeLink(referenceId string, customerId string, email string, amount i
 		params.Customer = stripe.String(customerId)
 	}
 
+	// Model Hub: Managed Payments (Stripe as merchant of record) excludes
+	// customers in China, so mainland users could not pay (no Alipay /
+	// WeChat Pay either). Opt this site's sessions out explicitly.
+	params.AddExtra("managed_payments[enabled]", "false")
+
 	result, err := session.New(params)
 	if err != nil {
 		return "", err
