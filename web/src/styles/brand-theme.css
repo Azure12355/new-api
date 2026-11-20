@@ -1,0 +1,114 @@
+/*
+ * Model Hub site theme (see projects/model-hub/08-assets/brand/视觉规范.md).
+ *
+ * Applies the brand to every page without touching upstream components:
+ * - purple primary (#7048ff) in light and dark mode
+ * - dark mode is a flat deep blue (#080b28) instead of charcoal
+ * - square corners everywhere (spinners stay round so they still read as
+ *   spinners)
+ *
+ * Loaded after theme.css and theme-presets.css. The brand tokens are also set
+ * on `body[data-theme-preset]` so a saved color preset cannot override them.
+ */
+
+:root,
+body[data-theme-preset] {
+  --radius: 0rem;
+
+  --background: #ffffff;
+  --foreground: #14112e;
+  --card: #ffffff;
+  --card-foreground: #14112e;
+  --popover: #ffffff;
+  --popover-foreground: #14112e;
+  --primary: #7048ff;
+  --primary-foreground: #ffffff;
+  --secondary: #f1eeff;
+  --secondary-foreground: #4a2bd6;
+  --muted: #f4f2fb;
+  --muted-foreground: #5f5b80;
+  --accent: #efeaff;
+  --accent-foreground: #14112e;
+  --border: #e4e0f5;
+  --input: #dcd7f0;
+  --ring: #8d6bff;
+  --chart-1: #7048ff;
+  --chart-2: #3d5bff;
+  --chart-3: #b9a6ff;
+  --chart-4: #ff7a00;
+  --chart-5: #2bb3a3;
+  --overview-accent-1: #7048ff;
+  --overview-accent-2: #3d5bff;
+  --overview-accent-3: #b9a6ff;
+  --sidebar: #f8f7fe;
+  --sidebar-foreground: #14112e;
+  --sidebar-primary: #7048ff;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #efeaff;
+  --sidebar-accent-foreground: #3c22b8;
+  --sidebar-border: #e4e0f5;
+  --sidebar-ring: #8d6bff;
+}
+
+.dark,
+.dark body[data-theme-preset] {
+  --background: #080b28;
+  --foreground: #f1efff;
+  --card: #0d1136;
+  --card-foreground: #f1efff;
+  --popover: #11163f;
+  --popover-foreground: #f1efff;
+  --primary: #7048ff;
+  --primary-foreground: #ffffff;
+  --secondary: #161a4a;
+  --secondary-foreground: #e4e0ff;
+  --muted: #141845;
+  --muted-foreground: #a29ed0;
+  --accent: #1d2160;
+  --accent-foreground: #ffffff;
+  --border: rgb(180 170 255 / 14%);
+  --input: rgb(180 170 255 / 22%);
+  --ring: #8d6bff;
+  --chart-1: #8d6bff;
+  --chart-2: #5b78ff;
+  --chart-3: #c9b9ff;
+  --chart-4: #ff8a1f;
+  --chart-5: #3cc7b6;
+  --overview-accent-1: #8d6bff;
+  --overview-accent-2: #5b78ff;
+  --overview-accent-3: #c9b9ff;
+  --sidebar: #070a24;
+  --sidebar-foreground: #ece9ff;
+  --sidebar-primary: #7048ff;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #1a1e58;
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: rgb(180 170 255 / 12%);
+  --sidebar-ring: #8d6bff;
+  --skeleton-base: #161a4a;
+  --skeleton-highlight: #232866;
+}
+
+/* Square corners everywhere, including hard-coded `rounded-full`,
+   `rounded-[..]` and third-party widgets. */
+*,
+*::before,
+*::after {
+  border-radius: 0 !important;
+}
+.animate-spin,
+.animate-spin::before,
+.animate-spin::after {
+  border-radius: 9999px !important;
+}
+
+::selection {
+  background: #7048ff;
+  color: #fff;
+}
+
+/* The pixel logo is dark purple on transparent; on dark surfaces it needs a
+   white tile to stay readable. */
+.dark img[src*='model-hub-pixel'] {
+  background: #fff;
+}

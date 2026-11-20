@@ -17,35 +17,69 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 import { useQuery } from '@tanstack/react-query'
-import { Construction } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
-import { PublicLayout } from '@/components/layout'
 import { RichContent } from '@/components/rich-content'
 import { Skeleton } from '@/components/ui/skeleton'
+import { BrandPublicLayout } from '@/features/home/brand/brand-public-layout'
+import { useTopUpRate } from '@/features/home/brand/home-seo'
 import { isHttpUrl, isLikelyHtml } from '@/lib/content-format'
 import { requireServerSuccess } from '@/lib/server-error-message'
 
 import { getAboutContent } from './api'
 
+/**
+ * Shown when no custom about content is configured: a short Model Hub
+ * introduction followed by the project credits.
+ */
 function EmptyAboutState() {
   const { t } = useTranslation()
   const currentYear = new Date().getFullYear()
+  const rate = useTopUpRate()
 
   return (
-    <div className='flex min-h-[60vh] items-center justify-center p-8'>
-      <div className='max-w-2xl space-y-6 text-center'>
-        <div className='flex justify-center'>
-          <Construction className='text-muted-foreground h-24 w-24' />
-        </div>
-        <div className='space-y-2'>
-          <h2 className='text-2xl font-bold'>{t('No About Content Set')}</h2>
-          <p className='text-muted-foreground'>
+    <div className='mh-wrap mh-about'>
+      <header className='mh-page-head'>
+        <span className='mh-kicker'>About</span>
+        <h1 className='mh-page-title'>{t('What is Model Hub?')}</h1>
+        <p className='mh-page-lede'>
+          {t(
+            'Model Hub is an AI model API gateway. With one base URL and one API key you can call Claude, DeepSeek and other models, using either the OpenAI or the Anthropic request format. Keys, balance and usage are managed in one console.'
+          )}
+        </p>
+      </header>
+      <div className='mh-cells'>
+        <div className='mh-cell'>
+          <span className='mh-n'>01 / {t('Affordable')}</span>
+          <h3>{t('Pay only for the tokens you use')}</h3>
+          <p>
             {t(
-              'The administrator has not configured any about content yet. You can set it in the settings page, supporting HTML or URL.'
+              "Billed per token, with every model's price listed publicly. Top-ups convert at ¥{{rate}} per $1 of credit.",
+              { rate }
             )}
           </p>
         </div>
+        <div className='mh-cell'>
+          <span className='mh-n'>02 / {t('Free credits')}</span>
+          <h3>{t('Free credits when you sign up')}</h3>
+          <p>
+            {t(
+              'New accounts get free trial credits, and we run regular credit promotions and top-up bonuses.'
+            )}
+          </p>
+        </div>
+        <div className='mh-cell'>
+          <span className='mh-n'>03 / {t('Easy to use')}</span>
+          <h3>{t('Works with the code you already have')}</h3>
+          <p>
+            {t(
+              'OpenAI and Anthropic compatible, with automatic retries across upstream routes. Plug it into Claude Code, Cursor or Cherry Studio.'
+            )}
+          </p>
+        </div>
+      </div>
+      <section className='mh-about-credits'>
+        <span className='mh-kicker'>Open source</span>
         <div className='space-y-4 text-sm'>
           <p>
             {t('New API Project Repository:')}{' '}
@@ -108,7 +142,7 @@ function EmptyAboutState() {
             .
           </p>
         </div>
-      </div>
+      </section>
     </div>
   )
 }
@@ -127,60 +161,60 @@ export function About() {
 
   if (isLoading) {
     return (
-      <PublicLayout>
+      <BrandPublicLayout>
         <div className='mx-auto flex max-w-4xl flex-col gap-4 py-12'>
           <Skeleton className='h-8 w-[45%]' />
           <Skeleton className='h-4 w-full' />
           <Skeleton className='h-4 w-[90%]' />
           <Skeleton className='h-4 w-[80%]' />
         </div>
-      </PublicLayout>
+      </BrandPublicLayout>
     )
   }
 
   if (!hasContent) {
     return (
-      <PublicLayout>
+      <BrandPublicLayout showMainContainer={false}>
         <EmptyAboutState />
-      </PublicLayout>
+      </BrandPublicLayout>
     )
   }
 
   if (isUrl) {
     return (
-      <PublicLayout showMainContainer={false}>
+      <BrandPublicLayout showMainContainer={false} sky={false}>
         <iframe
           src={rawContent}
           className='h-[calc(100vh-3.5rem)] w-full border-0'
           title={t('About')}
           sandbox='allow-forms allow-popups allow-popups-to-escape-sandbox allow-scripts'
         />
-      </PublicLayout>
+      </BrandPublicLayout>
     )
   }
 
   if (contentIsHtml) {
     return (
-      <PublicLayout showMainContainer={false}>
+      <BrandPublicLayout showMainContainer={false}>
         <RichContent
           mode='html'
           htmlVariant='isolated'
           content={rawContent}
           className='prose-neutral dark:prose-invert max-w-none'
         />
-      </PublicLayout>
+      </BrandPublicLayout>
     )
   }
 
   return (
-    <PublicLayout>
-      <div className='mx-auto max-w-6xl px-4 py-8'>
+    <BrandPublicLayout>
+      <div className='mh-about-content mx-auto max-w-6xl px-4 py-8'>
         <RichContent
           mode='markdown'
           content={rawContent}
           className='prose-neutral dark:prose-invert max-w-none'
         />
       </div>
-    </PublicLayout>
+    </BrandPublicLayout>
   )
 }

@@ -23,11 +23,11 @@ import { useTranslation } from 'react-i18next'
 import { Dialog } from '@/components/dialog'
 import { LanguageSwitcher } from '@/components/language-switcher'
 import { NotificationPopover } from '@/components/notification-popover'
+import { PixelWordmark } from '@/components/pixel-wordmark'
 import { ProfileDropdown } from '@/components/profile-dropdown'
 import { ThemeSwitch } from '@/components/theme-switch'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
-import { SystemUpdateAction } from '@/features/system-update/system-update-action'
 import { useNotifications } from '@/hooks/use-notifications'
 import { useSystemConfig } from '@/hooks/use-system-config'
 import { useTopNavLinks } from '@/hooks/use-top-nav-links'
@@ -224,17 +224,20 @@ export function PublicHeader(props: PublicHeaderProps) {
                   {logoContent}
                 </div>
                 <span
-                  className='max-w-48 truncate text-sm font-semibold tracking-tight'
+                  className='flex max-w-48 min-w-0 items-center'
                   title={displaySiteName}
                 >
                   {loading ? (
                     <Skeleton className='h-4 w-16' />
                   ) : (
-                    displaySiteName
+                    <PixelWordmark
+                      text={displaySiteName}
+                      scale={2}
+                      className='text-sm tracking-tight'
+                    />
                   )}
                 </span>
               </Link>
-              <SystemUpdateAction presentation='version' />
             </div>
 
             {/* Desktop nav */}

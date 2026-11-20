@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="zh-CN">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -10,8 +10,40 @@
     <meta name="title" content="New API" />
     <meta
       name="description"
-      content="Unified AI API gateway and admin dashboard."
+      content="Model Hub 是平价好用的大模型 API 中转平台：一个 Base URL 调用 Claude、DeepSeek 等模型，兼容 OpenAI 与 Anthropic 格式，支持 Claude Code，按 token 计费，注册即送免费额度。"
     />
+
+    <!-- Model Hub: site-level sharing tags and structured data. Page-specific
+         title, canonical, hreflang and FAQ data are set by the app per route. -->
+    <meta property="og:site_name" content="Model Hub" />
+    <meta property="og:type" content="website" />
+    <meta
+      property="og:image"
+      content="https://assets.model-hub.org/model-hub-pixel.png"
+    />
+    <meta name="twitter:card" content="summary" />
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "Organization",
+            "@id": "https://model-hub.org/#organization",
+            "name": "Model Hub",
+            "url": "https://model-hub.org/",
+            "logo": "https://assets.model-hub.org/model-hub-pixel.png"
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://model-hub.org/#website",
+            "name": "Model Hub",
+            "url": "https://model-hub.org/",
+            "inLanguage": ["zh-CN", "en"],
+            "publisher": { "@id": "https://model-hub.org/#organization" }
+          }
+        ]
+      }
+    </script>
 
     <meta name="theme-color" content="#fff" />
     <!-- Resolve the theme before first paint so the page never flashes light
@@ -37,5 +69,29 @@
 
   <body>
     <div id="root" translate="no" class="notranslate"></div>
+    <!-- Model Hub: plain-HTML summary for clients that do not run JavaScript
+         (some search and AI crawlers). Keep in sync with the home page copy. -->
+    <noscript>
+      <main>
+        <h1>Model Hub：平价好用的大模型 API 中转平台</h1>
+        <p>
+          Model Hub 是一个大模型 API 中转平台。一个 Base URL（https://api.model-hub.org/v1）、一个
+          API Key，就能调用 Claude Opus、Claude Sonnet、Claude Haiku、DeepSeek
+          等模型，兼容 OpenAI 与 Anthropic 接口格式，可直接用于 Claude Code、Cursor、Cherry
+          Studio、LobeChat、Dify。按实际 token 计费，注册即送免费体验额度，并不定期发放优惠额度和充值赠送。
+        </p>
+        <ul>
+          <li><a href="/pricing">模型广场：全部模型与价格</a></li>
+          <li><a href="/sign-up">免费注册，领取体验额度</a></li>
+          <li><a href="/llms.txt">llms.txt：给 AI 助手的站点说明与常见问题</a></li>
+        </ul>
+        <p lang="en">
+          Model Hub is an affordable AI model API gateway: one OpenAI- and
+          Anthropic-compatible base URL for Claude, DeepSeek and more, billed per
+          token, with free credits at sign-up.
+        </p>
+        <p>本站需要启用 JavaScript 才能使用控制台。</p>
+      </main>
+    </noscript>
   </body>
 </html>

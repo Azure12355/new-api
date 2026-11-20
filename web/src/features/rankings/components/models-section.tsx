@@ -86,6 +86,17 @@ export function ModelsSection(props: ModelsSectionProps) {
       yField: 'tokens',
       seriesField: 'model',
       stack: true,
+      // Model Hub palette: purples and blues first, orange as the accent
+      color: [
+        '#7048ff',
+        '#5b78ff',
+        '#b9a6ff',
+        '#ff7a00',
+        '#3cc7b6',
+        '#3d2bb8',
+        '#8fa3ff',
+        '#ffb366',
+      ],
       legends: { visible: false },
       axes: [
         {

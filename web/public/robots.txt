@@ -1,0 +1,33 @@
+# Model Hub — https://model-hub.org
+# Public pages are open to search engines and AI search crawlers.
+# Console, account and API paths are not useful in search results.
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /v1/
+Disallow: /mj/
+Disallow: /pg/
+Disallow: /dashboard
+Disallow: /keys
+Disallow: /usage-logs
+Disallow: /wallet
+Disallow: /profile
+Disallow: /security
+Disallow: /channels
+Disallow: /models
+Disallow: /users
+Disallow: /redemption-codes
+Disallow: /subscriptions
+Disallow: /system-settings
+Disallow: /system-info
+Disallow: /task-plugins
+Disallow: /request-processing
+Disallow: /playground
+Disallow: /chat
+Disallow: /setup
+Disallow: /oauth
+Disallow: /otp
+Disallow: /reset
+Disallow: /forgot-password
+
+Sitemap: https://model-hub.org/sitemap.xml

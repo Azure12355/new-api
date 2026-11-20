@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  <url>
+    <loc>https://model-hub.org/</loc>
+    <lastmod>2026-11-19</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://model-hub.org/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://model-hub.org/?lang=zh-CN"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://model-hub.org/"/>
+  </url>
+  <url>
+    <loc>https://model-hub.org/?lang=zh-CN</loc>
+    <lastmod>2026-11-19</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://model-hub.org/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://model-hub.org/?lang=zh-CN"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://model-hub.org/"/>
+  </url>
+  <url>
+    <loc>https://model-hub.org/pricing</loc>
+    <lastmod>2026-11-19</lastmod>
+  </url>
+  <url>
+    <loc>https://model-hub.org/rankings</loc>
+    <lastmod>2026-11-19</lastmod>
+  </url>
+  <url>
+    <loc>https://model-hub.org/sign-up</loc>
+    <lastmod>2026-11-19</lastmod>
+  </url>
+  <url>
+    <loc>https://model-hub.org/user-agreement</loc>
+    <lastmod>2026-11-19</lastmod>
+  </url>
+  <url>
+    <loc>https://model-hub.org/privacy-policy</loc>
+    <lastmod>2026-11-19</lastmod>
+  </url>
+</urlset>

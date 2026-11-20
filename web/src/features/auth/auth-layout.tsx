@@ -19,43 +19,55 @@ For commercial licensing, please contact support@quantumnous.com
 import { Link } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 
+import { PixelWordmark } from '@/components/pixel-wordmark'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useSystemConfig } from '@/hooks/use-system-config'
+
+import { AuthBrandPanel } from './components/auth-brand-panel'
 
 type AuthLayoutProps = {
   children: React.ReactNode
 }
 
+/**
+ * Model Hub auth screens: brand panel with pixel waves on the left (lg+),
+ * the form on the right. Below lg only the form column is shown.
+ */
 export function AuthLayout({ children }: AuthLayoutProps) {
   const { t } = useTranslation()
   const { systemName, logo, loading } = useSystemConfig()
 
   return (
-    <div className='relative grid h-svh max-w-none'>
-      <Link
-        to='/'
-        className='absolute top-4 left-4 z-10 flex items-center gap-2 transition-opacity hover:opacity-80 sm:top-8 sm:left-8'
-      >
-        <div className='relative h-8 w-8'>
-          {loading ? (
-            <Skeleton className='absolute inset-0 rounded-full' />
-          ) : (
-            <img
-              src={logo}
-              alt={t('Logo')}
-              className='h-8 w-8 rounded-full object-cover'
-            />
-          )}
+    <div className='mh-auth'>
+      <AuthBrandPanel systemName={systemName} logo={logo} />
+
+      <div className='mh-auth-main'>
+        <div className='mh-auth-top'>
+          <Link to='/' className='mh-auth-mobile-brand'>
+            {loading ? (
+              <Skeleton className='h-8 w-32' />
+            ) : (
+              <>
+                <img src={logo} alt={t('Logo')} />
+                <PixelWordmark text={systemName} scale={2} />
+              </>
+            )}
+          </Link>
+          <Link to='/' className='mh-auth-back'>
+            <span aria-hidden>←</span> {t('Back to Home')}
+          </Link>
         </div>
-        {loading ? (
-          <Skeleton className='h-6 w-24' />
-        ) : (
-          <h1 className='text-xl font-medium'>{systemName}</h1>
-        )}
-      </Link>
-      <div className='container flex items-center pt-16 sm:pt-0'>
-        <div className='mx-auto flex w-full flex-col justify-center space-y-2 px-4 py-8 sm:w-[480px] sm:p-8'>
+
+        <div className='mh-auth-body'>
+          <span className='mh-auth-pixels' aria-hidden />
           {children}
+        </div>
+
+        <div className='mh-auth-foot'>
+          <span>
+            © {new Date().getFullYear()} {systemName}
+          </span>
+          <span>OpenAI + Anthropic</span>
         </div>
       </div>
     </div>

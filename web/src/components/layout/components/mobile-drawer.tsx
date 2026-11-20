@@ -21,6 +21,7 @@ import { X, User, Wallet, LogOut, ShieldCheck } from 'lucide-react'
 import { AnimatePresence, motion, type Variants } from 'motion/react'
 import { useTranslation } from 'react-i18next'
 
+import { PixelWordmark } from '@/components/pixel-wordmark'
 import { SignOutDialog } from '@/components/sign-out-dialog'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
@@ -65,7 +66,11 @@ function BrandLogo({
         ) : null}
         {displayLogo}
       </div>
-      {loading ? <Skeleton className='h-5 w-20' /> : displaySiteName}
+      {loading ? (
+        <Skeleton className='h-5 w-20' />
+      ) : (
+        <PixelWordmark text={displaySiteName} scale={2} />
+      )}
     </Link>
   )
 }
