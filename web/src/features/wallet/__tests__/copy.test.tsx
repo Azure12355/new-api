@@ -125,3 +125,43 @@ it.each([
     expect(screen.getByPlaceholderText('Minimum 1')).toBeVisible()
   }
 )
+
+it('shows dollar amounts with a $ sign when Stripe USD is the only gateway', () => {
+  render(
+    <I18nextProvider i18n={i18n}>
+      <RechargeFormCard
+        topupInfo={{
+          enable_online_topup: true,
+          enable_stripe_topup: true,
+          pay_methods: [],
+          min_topup: 1,
+          stripe_min_topup: 1,
+          amount_options: [10, 20],
+          discount: {},
+        }}
+        presetAmounts={[{ value: 10 }, { value: 20 }]}
+        selectedPreset={null}
+        topupAmount={1}
+        paymentAmount={1}
+        priceRatio={7.3}
+        usdExchangeRate={7.3}
+        usdPricing
+        calculating={false}
+        paymentLoading={null}
+        redemptionCode=''
+        redeeming={false}
+        onSelectPreset={vi.fn()}
+        onTopupAmountChange={vi.fn()}
+        onPaymentMethodSelect={vi.fn()}
+        onRedemptionCodeChange={vi.fn()}
+        onRedeem={vi.fn()}
+      />
+    </I18nextProvider>
+  )
+
+  // $10 of credit is charged as $10, not shown as 73 in the display currency
+  expect(screen.getByRole('button', { name: /^\$10/ })).toHaveTextContent(
+    '$10支付 $10'
+  )
+  expect(screen.getByPlaceholderText('最低 $1')).toBeVisible()
+})

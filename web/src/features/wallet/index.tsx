@@ -305,6 +305,14 @@ export function Wallet(props: WalletProps) {
     }
   }
 
+  // Model Hub: Stripe in USD is the only gateway, so show dollar amounts
+  const usdPricing =
+    !!topupInfo?.pay_methods?.length &&
+    topupInfo.pay_methods.every((method) => method.type === 'stripe') &&
+    !topupInfo.enable_creem_topup &&
+    !topupInfo.enable_waffo_topup &&
+    !topupInfo.enable_waffo_pancake_topup
+
   const showCnyCard = isZh && !!topupInfo?.enable_stripe_cny_topup && !preferUsd
 
   const handleSubscriptionAvailabilityChange = useCallback(
@@ -374,6 +382,7 @@ export function Wallet(props: WalletProps) {
                       loading={topupLoading}
                       priceRatio={(status?.price as number) || 1}
                       usdExchangeRate={effectiveUsdExchangeRate}
+                      usdPricing={usdPricing}
                       onOpenBilling={() => setBillingDialogOpen(true)}
                       creemProducts={topupInfo?.creem_products}
                       enableCreemTopup={topupInfo?.enable_creem_topup}
@@ -422,6 +431,7 @@ export function Wallet(props: WalletProps) {
         processing={processing || waffoProcessing || pancakeProcessing}
         discountRate={getDiscountRate()}
         usdExchangeRate={effectiveUsdExchangeRate}
+        usdPricing={usdPricing}
       />
 
       <TransferDialog
