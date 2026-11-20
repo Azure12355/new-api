@@ -248,11 +248,18 @@ export function BillingHistoryDialog({
                             {t('Amount')}
                           </Label>
                           <div className='text-sm font-semibold'>
-                            {formatCurrencyFromUSD(record.amount, {
-                              digitsLarge: 2,
-                              digitsSmall: 2,
-                              abbreviate: false,
-                            })}
+                            {/* stripe_cny orders store yuan paid in amount and
+                                the credited dollars in money */}
+                            {formatCurrencyFromUSD(
+                              record.payment_method === 'stripe_cny'
+                                ? record.money
+                                : record.amount,
+                              {
+                                digitsLarge: 2,
+                                digitsSmall: 2,
+                                abbreviate: false,
+                              }
+                            )}
                           </div>
                         </div>
                         <div className='space-y-1'>
@@ -260,7 +267,9 @@ export function BillingHistoryDialog({
                             {t('Payment')}
                           </Label>
                           <div className='text-sm font-semibold text-red-600'>
-                            {formatNumber(record.money)}
+                            {record.payment_method === 'stripe_cny'
+                              ? `¥${formatNumber(record.amount)}`
+                              : formatNumber(record.money)}
                           </div>
                         </div>
                       </div>

@@ -130,6 +130,14 @@ export interface TopupInfo {
   min_topup: number
   /** Minimum topup amount for Stripe */
   stripe_min_topup: number
+  /** Model Hub: whether Stripe CNY top-up (¥1 per unit) is enabled */
+  enable_stripe_cny_topup?: boolean
+  /** Model Hub: minimum CNY top-up, in yuan */
+  stripe_cny_min_topup?: number
+  /** Model Hub: CNY paid per $1 of credit */
+  stripe_cny_rate?: number
+  /** Model Hub: top-up group multiplier applied to the signed-in user's credit */
+  topup_group_ratio?: number
   /** Preset amount options */
   amount_options: number[]
   /** Discount rates by amount */
@@ -180,10 +188,12 @@ export interface RedemptionRequest {
  * Payment request parameters
  */
 export interface PaymentRequest {
-  /** Topup amount */
+  /** Topup amount (yuan when currency is 'cny', otherwise $ of credit) */
   amount: number
   /** Payment method identifier */
   payment_method: string
+  /** Model Hub: Stripe charge currency; omitted means USD */
+  currency?: 'cny' | 'usd'
 }
 
 /**
@@ -210,6 +220,8 @@ export interface WaffoPancakePaymentRequest {
 export interface AmountRequest {
   /** Topup amount to calculate */
   amount: number
+  /** Model Hub: Stripe charge currency; omitted means USD */
+  currency?: 'cny' | 'usd'
 }
 
 /**

@@ -7840,6 +7840,20 @@
     "best models": "顶尖模型",
     "Free credits on sign-up!": "注册就送额度！",
     "One key for Claude, DeepSeek and": "一个 Key，调用 Claude、DeepSeek 等",
-    "Whatever price you need, we have it!": "你想要的价格我们都有！"
+    "Whatever price you need, we have it!": "你想要的价格我们都有！",
+    "Top up in CNY": "人民币充值",
+    "Pay with Alipay, WeChat Pay or a bank card": "支持支付宝、微信支付、银行卡付款",
+    "Credit added: {{credit}}": "到账额度 {{credit}}",
+    "Minimum ¥{{amount}}, whole yuan": "最低 ¥{{amount}}，整数金额",
+    "Enter a whole number of yuan, at least ¥{{amount}}": "请输入整数金额，最低 ¥{{amount}}",
+    "You pay": "支付",
+    "Bank card": "银行卡",
+    "Pay ¥{{amount}}": "立即支付 ¥{{amount}}",
+    "Rate: ¥{{rate}} = $1 credit. Prices on the model square are listed in the same credit.": "汇率：¥{{rate}} = $1 额度，模型广场的价格按同一额度计算。",
+    "Pay in USD instead": "改用美元充值",
+    "Top up in CNY instead": "改用人民币充值",
+    "Alipay / WeChat Pay / Card (CNY)": "支付宝 / 微信支付 / 银行卡（人民币）",
+    "Unsupported currency": "不支持的币种",
+    "CNY payment is not enabled": "未开启人民币支付"
   }
 }

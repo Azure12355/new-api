@@ -100,6 +100,7 @@ func GetTopUpInfo(c *gin.Context) {
 	data := gin.H{
 		"enable_online_topup":              isEpayTopUpEnabled(),
 		"enable_stripe_topup":              isStripeTopUpEnabled(),
+		"enable_stripe_cny_topup":          isStripeTopUpEnabled() && setting.StripeCnyPriceId != "" && operation_setting.Price > 0,
 		"enable_creem_topup":               isCreemTopUpEnabled(),
 		"enable_waffo_topup":               enableWaffo,
 		"enable_waffo_pancake_topup":       enableWaffoPancake,
@@ -116,6 +117,9 @@ func GetTopUpInfo(c *gin.Context) {
 		"pay_methods":             payMethods,
 		"min_topup":               operation_setting.MinTopUp,
 		"stripe_min_topup":        setting.StripeMinTopUp,
+		"stripe_cny_min_topup":    setting.StripeCnyMinTopUp,
+		"stripe_cny_rate":         operation_setting.Price,
+		"topup_group_ratio":       currentUserTopupGroupRatio(c),
 		"waffo_min_topup":         setting.WaffoMinTopUp,
 		"waffo_pancake_min_topup": setting.WaffoPancakeMinTopUp,
 		"amount_options":          operation_setting.GetPaymentSetting().AmountOptions,
@@ -604,4 +608,23 @@ func AdminCompleteTopUp(c *gin.Context) {
 		return
 	}
 	common.ApiSuccess(c, nil)
+}
+
+// currentUserTopupGroupRatio is the top-up group multiplier applied to the
+// signed-in user's credited amount (1 when the group has none), so the wallet
+// can show the credit an order will actually add.
+func currentUserTopupGroupRatio(c *gin.Context) float64 {
+	id := c.GetInt("id")
+	if id == 0 {
+		return 1
+	}
+	group, err := model.GetUserGroup(id, true)
+	if err != nil {
+		return 1
+	}
+	ratio := common.GetTopupGroupRatio(group)
+	if ratio == 0 {
+		return 1
+	}
+	return ratio
 }

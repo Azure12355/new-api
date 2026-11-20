@@ -506,3 +506,45 @@ func TestUpdateOptionValidatesEpaySignSettings(t *testing.T) {
 	assert.Equal(t, platformPublicKey, returned[publicKeyKey])
 	assert.NotContains(t, returned, privateKeyKey)
 }
+
+func TestGetTopUpInfoStripeCny(t *testing.T) {
+	confirmPaymentComplianceForTest(t)
+	oldAPI, oldWebhook, oldUSD, oldCNY := setting.StripeApiSecret, setting.StripeWebhookSecret, setting.StripePriceId, setting.StripeCnyPriceId
+	oldMin, oldRate := setting.StripeCnyMinTopUp, operation_setting.Price
+	t.Cleanup(func() {
+		setting.StripeApiSecret, setting.StripeWebhookSecret, setting.StripePriceId, setting.StripeCnyPriceId = oldAPI, oldWebhook, oldUSD, oldCNY
+		setting.StripeCnyMinTopUp, operation_setting.Price = oldMin, oldRate
+	})
+	for _, tc := range []struct {
+		name, priceID, usdID string
+		rate                 float64
+		compliance, enabled  bool
+	}{
+		{"enabled", "price_cny", "price_usd", 7.3, true, true},
+		{"missing CNY price", "", "price_usd", 7.3, true, false},
+		{"invalid rate", "price_cny", "price_usd", 0, true, false},
+		{"Stripe unavailable", "price_cny", "", 7.3, true, false},
+		{"compliance unconfirmed", "price_cny", "price_usd", 7.3, false, false},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			setting.StripeApiSecret, setting.StripeWebhookSecret = "sk_test_fixture", "whsec_fixture"
+			setting.StripePriceId, setting.StripeCnyPriceId = tc.usdID, tc.priceID
+			setting.StripeCnyMinTopUp, operation_setting.Price = 10, tc.rate
+			operation_setting.GetPaymentSetting().ComplianceConfirmed = tc.compliance
+			recorder := httptest.NewRecorder()
+			ctx, _ := gin.CreateTestContext(recorder)
+			GetTopUpInfo(ctx)
+			require.Equal(t, http.StatusOK, recorder.Code)
+			var result struct {
+				Success bool           `json:"success"`
+				Data    map[string]any `json:"data"`
+			}
+			require.NoError(t, common.Unmarshal(recorder.Body.Bytes(), &result))
+			require.True(t, result.Success)
+			assert.Equal(t, tc.enabled, result.Data["enable_stripe_cny_topup"])
+			assert.Equal(t, float64(10), result.Data["stripe_cny_min_topup"])
+			assert.Equal(t, tc.rate, result.Data["stripe_cny_rate"])
+			assert.Equal(t, float64(1), result.Data["topup_group_ratio"])
+		})
+	}
+}

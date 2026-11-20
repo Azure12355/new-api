@@ -7840,6 +7840,20 @@
     "best models": "best models",
     "Free credits on sign-up!": "Free credits on sign-up!",
     "One key for Claude, DeepSeek and": "One key for Claude, DeepSeek and",
-    "Whatever price you need, we have it!": "Whatever price you need, we have it!"
+    "Whatever price you need, we have it!": "Whatever price you need, we have it!",
+    "Top up in CNY": "Top up in CNY",
+    "Pay with Alipay, WeChat Pay or a bank card": "Pay with Alipay, WeChat Pay or a bank card",
+    "Credit added: {{credit}}": "Credit added: {{credit}}",
+    "Minimum ¥{{amount}}, whole yuan": "Minimum ¥{{amount}}, whole yuan",
+    "Enter a whole number of yuan, at least ¥{{amount}}": "Enter a whole number of yuan, at least ¥{{amount}}",
+    "You pay": "You pay",
+    "Bank card": "Bank card",
+    "Pay ¥{{amount}}": "Pay ¥{{amount}}",
+    "Rate: ¥{{rate}} = $1 credit. Prices on the model square are listed in the same credit.": "Rate: ¥{{rate}} = $1 credit. Prices on the model square are listed in the same credit.",
+    "Pay in USD instead": "Pay in USD instead",
+    "Top up in CNY instead": "Top up in CNY instead",
+    "Alipay / WeChat Pay / Card (CNY)": "Alipay / WeChat Pay / Card (CNY)",
+    "Unsupported currency": "Unsupported currency",
+    "CNY payment is not enabled": "CNY payment is not enabled"
   }
 }
