@@ -20,6 +20,7 @@ import { queryOptions, type QueryClient } from '@tanstack/react-query'
 
 import { getStatus } from '@/lib/api'
 import { DEFAULT_SYSTEM_NAME, DEFAULT_LOGO } from '@/lib/constants'
+import { usePricingPreferencesStore } from '@/stores/pricing-preferences-store'
 import {
   useSystemConfigStore,
   type CurrencyConfig,
@@ -57,6 +58,42 @@ function toNumber(value: unknown, fallback: number): number {
   return fallback
 }
 
+function pricingDisplayType(currency: CurrencyConfig): CurrencyDisplayType {
+  const siteType = currency.siteQuotaDisplayType ?? currency.quotaDisplayType
+  if (siteType === 'USD' || siteType === 'TOKENS') return siteType
+  const rate =
+    siteType === 'CNY'
+      ? currency.usdExchangeRate
+      : currency.customCurrencyExchangeRate
+  return usePricingPreferencesStore.getState().currency === 'site' &&
+    Number.isFinite(rate) &&
+    rate > 0
+    ? siteType
+    : 'USD'
+}
+
+export function syncPricingCurrency(): () => void {
+  const sync = () => {
+    const {
+      config: { currency },
+      setConfig,
+    } = useSystemConfigStore.getState()
+    const quotaDisplayType = pricingDisplayType(currency)
+    if (quotaDisplayType !== currency.quotaDisplayType) {
+      setConfig({
+        currency: {
+          ...currency,
+          siteQuotaDisplayType:
+            currency.siteQuotaDisplayType ?? currency.quotaDisplayType,
+          quotaDisplayType,
+        },
+      })
+    }
+  }
+  sync()
+  return usePricingPreferencesStore.subscribe(sync)
+}
+
 /**
  * Map `/api/status` response data to our persisted system config structure
  */
@@ -65,15 +102,15 @@ export function mapStatusDataToConfig(
 ): Partial<SystemConfig> {
   if (!data) return {}
 
-  const quotaDisplayType =
+  const siteQuotaDisplayType =
     (data.quota_display_type as CurrencyDisplayType | undefined) ??
     DEFAULT_CURRENCY_CONFIG.quotaDisplayType
-
   const currency: CurrencyConfig = {
     displayInCurrency:
       (data.display_in_currency as boolean | undefined) ??
       DEFAULT_CURRENCY_CONFIG.displayInCurrency,
-    quotaDisplayType,
+    quotaDisplayType: siteQuotaDisplayType,
+    siteQuotaDisplayType,
     quotaPerUnit: toNumber(
       data.quota_per_unit,
       DEFAULT_CURRENCY_CONFIG.quotaPerUnit
@@ -99,7 +136,7 @@ export function mapStatusDataToConfig(
     displayTokenStatEnabled: data.display_token_stat_enabled as
       | boolean
       | undefined,
-    currency,
+    currency: { ...currency, quotaDisplayType: pricingDisplayType(currency) },
   }
 }
 

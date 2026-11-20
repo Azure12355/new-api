@@ -23,6 +23,7 @@ import i18next from 'i18next'
 import { afterEach, expect, it, vi } from 'vitest'
 
 import { api } from '@/lib/api'
+import { mapStatusDataToConfig } from '@/lib/status-query'
 import {
   DEFAULT_CURRENCY_CONFIG,
   useSystemConfigStore,
@@ -98,6 +99,39 @@ const model: PricingModel = {
     },
   },
 }
+it('shows the USD input and output rates in both the pricing summary and tier table on a CNY site', () => {
+  const { config, setConfig } = useSystemConfigStore.getState()
+  const expression = 'tier("standard", p * 4 + c * 20)'
+  try {
+    setConfig(
+      mapStatusDataToConfig({
+        quota_display_type: 'CNY',
+        usd_exchange_rate: 7.3,
+      })
+    )
+    const summary = render(
+      <ModelPriceCell
+        model={{
+          ...model,
+          billing_expr: expression,
+          billing_usage_schema: undefined,
+        }}
+        options={{ tokenUnit: 'M' }}
+      />
+    )
+    expect(summary.container).toHaveTextContent('USD / 1M')
+    expect(summary.getByText('4')).toBeVisible()
+    expect(summary.getByText('20')).toBeVisible()
+    const breakdown = render(
+      <DynamicPricingBreakdown compact billingExpr={expression} />
+    )
+    expect(breakdown.container).toHaveTextContent('$4.0000')
+    expect(breakdown.container).toHaveTextContent('$20.0000')
+  } finally {
+    setConfig(config)
+  }
+})
+
 const clients: QueryClient[] = []
 
 it('shows nested task conditions and prices in detail and group tables without ambiguous log matches', () => {

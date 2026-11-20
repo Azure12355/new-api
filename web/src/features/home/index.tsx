@@ -26,7 +26,8 @@ import { useTheme } from '@/context/theme-provider'
 import { isLikelyHtml } from '@/lib/content-format'
 import { useAuthStore } from '@/stores/auth-store'
 
-import { CTA, Features, Hero, HowItWorks, Stats } from './components'
+import { BrandHome } from './brand/brand-home'
+import { BrandPublicLayout } from './brand/brand-public-layout'
 import { useHomePageContent } from './hooks'
 
 export function Home() {
@@ -120,14 +121,11 @@ export function Home() {
     )
   }
 
+  // Model Hub: brand home (always dark deep blue, square corners)
   return (
-    <PublicLayout showMainContainer={false}>
-      <Hero isAuthenticated={isAuthenticated} />
-      <Stats />
-      <Features />
-      <HowItWorks />
-      <CTA isAuthenticated={isAuthenticated} />
+    <BrandPublicLayout showMainContainer={false} sky={false}>
+      <BrandHome isAuthenticated={isAuthenticated} />
       <Footer />
-    </PublicLayout>
+    </BrandPublicLayout>
   )
 }

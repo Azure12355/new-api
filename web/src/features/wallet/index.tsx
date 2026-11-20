@@ -16,15 +16,20 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
+import i18next from 'i18next'
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
+import { toast } from 'sonner'
 
 import { SectionPageLayout } from '@/components/layout'
 import { useStatus } from '@/hooks/use-status'
 import { useSystemConfig } from '@/hooks/use-system-config'
 import { getSelf } from '@/lib/api'
+import { handleServerError } from '@/lib/handle-server-error'
 
+import { isApiSuccess, requestStripePayment } from './api'
 import { AffiliateRewardsCard } from './components/affiliate-rewards-card'
+import { CnyRechargeCard } from './components/cny-recharge-card'
 import { BillingHistoryDialog } from './components/dialogs/billing-history-dialog'
 import { CreemConfirmDialog } from './components/dialogs/creem-confirm-dialog'
 import { PaymentConfirmDialog } from './components/dialogs/payment-confirm-dialog'
@@ -60,7 +65,10 @@ interface WalletProps {
 }
 
 export function Wallet(props: WalletProps) {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
+  const isZh = (i18n.resolvedLanguage || i18n.language).startsWith('zh')
+  const [preferUsd, setPreferUsd] = useState(false)
+  const [cnyProcessing, setCnyProcessing] = useState(false)
   const [user, setUser] = useState<UserWalletData | null>(null)
   const [userLoading, setUserLoading] = useState(true)
   const [topupAmount, setTopupAmount] = useState(0)
@@ -275,6 +283,38 @@ export function Wallet(props: WalletProps) {
     return topupInfo?.discount?.[topupAmount] || DEFAULT_DISCOUNT_RATE
   }, [topupInfo, topupAmount])
 
+  // Model Hub: Stripe checkout in CNY for a whole-yuan amount
+  const handleCnyPay = async (yuan: number) => {
+    try {
+      setCnyProcessing(true)
+      const response = await requestStripePayment({
+        amount: yuan,
+        payment_method: 'stripe',
+        currency: 'cny',
+      })
+      if (!isApiSuccess(response) || !response.data?.pay_link) {
+        handleServerError(response, i18next.t('Payment request failed'))
+        return
+      }
+      toast.success(t('Redirecting to payment page...'))
+      window.location.assign(response.data.pay_link)
+    } catch (error) {
+      handleServerError(error, i18next.t('Payment request failed'))
+    } finally {
+      setCnyProcessing(false)
+    }
+  }
+
+  // Model Hub: Stripe in USD is the only gateway, so show dollar amounts
+  const usdPricing =
+    !!topupInfo?.pay_methods?.length &&
+    topupInfo.pay_methods.every((method) => method.type === 'stripe') &&
+    !topupInfo.enable_creem_topup &&
+    !topupInfo.enable_waffo_topup &&
+    !topupInfo.enable_waffo_pancake_topup
+
+  const showCnyCard = isZh && !!topupInfo?.enable_stripe_cny_topup && !preferUsd
+
   const handleSubscriptionAvailabilityChange = useCallback(
     (available: boolean) => {
       setShowSubscriptionPanel(available)
@@ -298,37 +338,65 @@ export function Wallet(props: WalletProps) {
               }
             >
               <div id='wallet-add-funds' className='scroll-mt-4'>
-                <RechargeFormCard
-                  topupInfo={topupInfo}
-                  presetAmounts={presetAmounts}
-                  selectedPreset={selectedPreset}
-                  onSelectPreset={handleSelectPreset}
-                  topupAmount={topupAmount}
-                  onTopupAmountChange={handleTopupAmountChange}
-                  paymentAmount={paymentAmount}
-                  calculating={calculating}
-                  onPaymentMethodSelect={handlePaymentMethodSelect}
-                  paymentLoading={paymentLoading}
-                  redemptionCode={redemptionCode}
-                  onRedemptionCodeChange={setRedemptionCode}
-                  onRedeem={handleRedeem}
-                  redeeming={redeeming}
-                  topupLink={topupInfo?.topup_link}
-                  loading={topupLoading}
-                  priceRatio={(status?.price as number) || 1}
-                  usdExchangeRate={effectiveUsdExchangeRate}
-                  onOpenBilling={() => setBillingDialogOpen(true)}
-                  creemProducts={topupInfo?.creem_products}
-                  enableCreemTopup={topupInfo?.enable_creem_topup}
-                  onCreemProductSelect={handleCreemProductSelect}
-                  enableWaffoTopup={topupInfo?.enable_waffo_topup}
-                  waffoPayMethods={topupInfo?.waffo_pay_methods}
-                  waffoMinTopup={topupInfo?.waffo_min_topup}
-                  onWaffoMethodSelect={handleWaffoMethodSelect}
-                  enableWaffoPancakeTopup={
-                    topupInfo?.enable_waffo_pancake_topup
-                  }
-                />
+                {showCnyCard ? (
+                  <CnyRechargeCard
+                    minTopup={topupInfo?.stripe_cny_min_topup || 10}
+                    rate={topupInfo?.stripe_cny_rate || 7.3}
+                    groupRatio={topupInfo?.topup_group_ratio || 1}
+                    processing={cnyProcessing}
+                    onPay={handleCnyPay}
+                    onSwitchToUsd={() => setPreferUsd(true)}
+                    onOpenBilling={() => setBillingDialogOpen(true)}
+                    redemptionCode={redemptionCode}
+                    onRedemptionCodeChange={setRedemptionCode}
+                    onRedeem={handleRedeem}
+                    redeeming={redeeming}
+                  />
+                ) : (
+                  <>
+                    {isZh && topupInfo?.enable_stripe_cny_topup && (
+                      <button
+                        type='button'
+                        onClick={() => setPreferUsd(false)}
+                        className='text-primary mb-2 text-sm underline-offset-2 hover:underline'
+                      >
+                        {t('Top up in CNY instead')}
+                      </button>
+                    )}
+                    <RechargeFormCard
+                      topupInfo={topupInfo}
+                      presetAmounts={presetAmounts}
+                      selectedPreset={selectedPreset}
+                      onSelectPreset={handleSelectPreset}
+                      topupAmount={topupAmount}
+                      onTopupAmountChange={handleTopupAmountChange}
+                      paymentAmount={paymentAmount}
+                      calculating={calculating}
+                      onPaymentMethodSelect={handlePaymentMethodSelect}
+                      paymentLoading={paymentLoading}
+                      redemptionCode={redemptionCode}
+                      onRedemptionCodeChange={setRedemptionCode}
+                      onRedeem={handleRedeem}
+                      redeeming={redeeming}
+                      topupLink={topupInfo?.topup_link}
+                      loading={topupLoading}
+                      priceRatio={(status?.price as number) || 1}
+                      usdExchangeRate={effectiveUsdExchangeRate}
+                      usdPricing={usdPricing}
+                      onOpenBilling={() => setBillingDialogOpen(true)}
+                      creemProducts={topupInfo?.creem_products}
+                      enableCreemTopup={topupInfo?.enable_creem_topup}
+                      onCreemProductSelect={handleCreemProductSelect}
+                      enableWaffoTopup={topupInfo?.enable_waffo_topup}
+                      waffoPayMethods={topupInfo?.waffo_pay_methods}
+                      waffoMinTopup={topupInfo?.waffo_min_topup}
+                      onWaffoMethodSelect={handleWaffoMethodSelect}
+                      enableWaffoPancakeTopup={
+                        topupInfo?.enable_waffo_pancake_topup
+                      }
+                    />
+                  </>
+                )}
               </div>
 
               <SubscriptionPlansCard
@@ -363,6 +431,7 @@ export function Wallet(props: WalletProps) {
         processing={processing || waffoProcessing || pancakeProcessing}
         discountRate={getDiscountRate()}
         usdExchangeRate={effectiveUsdExchangeRate}
+        usdPricing={usdPricing}
       />
 
       <TransferDialog

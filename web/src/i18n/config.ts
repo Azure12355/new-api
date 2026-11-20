@@ -53,12 +53,28 @@ i18n
       escapeValue: false, // not needed for react as it escapes by default
     },
     detection: {
-      order: ['localStorage', 'navigator'],
+      // `?lang=zh-CN` / `?lang=en` gives each language its own crawlable URL
+      // (the home page links them with hreflang); it is also cached like a
+      // manual choice.
+      order: ['querystring', 'localStorage', 'navigator'],
+      lookupQuerystring: 'lang',
       caches: ['localStorage'],
       // Browsers report `zh-CN`/`zh-TW`/`zh`; map them onto our `zhCN`/`zhTW`
       // codes (non-Chinese codes pass through for normal supportedLngs matching).
       convertDetectedLanguage,
     },
   })
+
+// Keep <html lang> in sync with the interface language (search engines and
+// screen readers read it). Interface codes zhCN/zhTW are not BCP 47 tags.
+// The initial language is usually resolved during init(), before this
+// listener exists, so it is applied once here as well.
+const HTML_LANG_TAGS: Record<string, string> = { zhCN: 'zh-CN', zhTW: 'zh-TW' }
+const syncHtmlLang = (lng: string | undefined) => {
+  if (typeof document === 'undefined' || !lng) return
+  document.documentElement.lang = HTML_LANG_TAGS[lng] ?? lng
+}
+i18n.on('languageChanged', syncHtmlLang)
+syncHtmlLang(i18n.resolvedLanguage || i18n.language)
 
 export default i18n

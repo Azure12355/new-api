@@ -64,3 +64,6 @@ export const DEFAULT_DISCOUNT_RATE = 1.0
  * Default minimum topup amount
  */
 export const DEFAULT_MIN_TOPUP = 1
+
+/** Model Hub: preset yuan amounts on the CNY top-up card. */
+export const CNY_PRESET_AMOUNTS = [10, 50, 200, 500] as const

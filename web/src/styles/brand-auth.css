@@ -1,0 +1,236 @@
+/*
+ * Model Hub sign-in / sign-up screens: brand panel with the pixel waves on
+ * the left (lg+), form on the right. Square corners and solid colors, same
+ * rules as the home page (see 08-assets/brand/视觉规范.md).
+ */
+
+.mh-auth {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  min-height: 100svh;
+  background: var(--background);
+  color: var(--foreground);
+}
+
+/* ---------- left: brand panel ---------- */
+.mh-auth-art {
+  position: relative;
+  display: none;
+  overflow: hidden;
+  border-right: 1px solid var(--mh-line);
+}
+.mh-sky.mh-sky-contained {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+.mh-auth-cols {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  opacity: 0.4;
+  pointer-events: none;
+}
+.mh-auth-cols i {
+  border-right: 1px solid var(--mh-line);
+}
+.mh-auth-inner {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 40px;
+  height: 100%;
+  padding: 36px clamp(32px, 4vw, 64px) 40px;
+}
+.mh-auth-brand {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  gap: 10px;
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+.mh-auth-brand img {
+  width: 30px;
+  height: 30px;
+  background: #fff;
+}
+.mh-auth-points {
+  display: grid;
+  gap: 12px;
+  margin-top: 36px;
+  font-size: 16px;
+  color: #d4cff5;
+}
+.mh-auth-points li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.mh-auth-points li::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  flex: none;
+  background: var(--mh-orange);
+}
+
+/* request ticker: a glass console card on top of the waves */
+.mh-auth-ticker {
+  width: min(480px, 100%);
+  border: 1px solid var(--mh-line2);
+  background: rgb(6 8 34 / 72%);
+  backdrop-filter: blur(18px);
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 12.5px;
+}
+.mh-auth-ticker-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-bottom: 1px solid rgb(255 255 255 / 10%);
+  color: var(--muted-foreground);
+}
+.mh-auth-ticker-live {
+  margin-left: auto;
+  color: var(--mh-violet);
+}
+.mh-auth-ticker-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto 64px;
+  gap: 14px;
+  align-items: center;
+  padding: 10px 14px;
+  color: #8e89bf;
+  transition:
+    background 0.6s var(--mh-ease),
+    color 0.6s var(--mh-ease);
+}
+.mh-auth-ticker-row + .mh-auth-ticker-row {
+  border-top: 1px solid rgb(255 255 255 / 6%);
+}
+.mh-auth-ticker-id {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.mh-auth-ticker-state {
+  text-align: right;
+}
+.mh-auth-ticker-row[data-active='true'] {
+  background: rgb(112 72 255 / 22%);
+  color: #fff;
+}
+.mh-auth-ticker-row[data-active='true'] .mh-auth-ticker-state {
+  color: #6ee7a8;
+}
+.mh-auth-ticker-row[data-active='true'] .mh-auth-ticker-id::before {
+  content: '▸ ';
+  color: var(--mh-orange);
+}
+
+/* ---------- right: form ---------- */
+.mh-auth-main {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 100svh;
+  padding: 24px clamp(20px, 4vw, 48px);
+}
+.mh-auth-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.mh-auth-mobile-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 16px;
+  font-weight: 600;
+}
+.mh-auth-mobile-brand img {
+  width: 28px;
+  height: 28px;
+}
+.mh-auth-back {
+  margin-left: auto;
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 12.5px;
+  letter-spacing: 0.04em;
+  color: var(--muted-foreground);
+  transition: color 0.3s;
+}
+.mh-auth-back:hover {
+  color: var(--primary);
+}
+.mh-auth-body {
+  position: relative;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  justify-content: center;
+  width: 100%;
+  max-width: 420px;
+  margin: 0 auto;
+  padding: 56px 0;
+}
+.mh-auth-body h2 {
+  font-size: 32px;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  text-align: left !important;
+}
+.mh-auth-body input:not([type='checkbox']):not([type='radio']) {
+  height: 44px;
+}
+.mh-auth-body button[type='submit'] {
+  height: 46px;
+  font-size: 15px;
+  font-weight: 600;
+}
+/* small pixel cluster above the form heading */
+.mh-auth-pixels {
+  display: block;
+  width: 8px;
+  height: 8px;
+  margin-bottom: 30px;
+  background: var(--primary);
+  box-shadow:
+    10px 0 0 var(--primary),
+    20px 0 0 #b9a6ff,
+    0 10px 0 #b9a6ff,
+    10px 10px 0 #ff7a00;
+}
+.mh-auth-foot {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 11.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+}
+
+@media (min-width: 1024px) {
+  .mh-auth {
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  }
+  .mh-auth-art {
+    position: sticky;
+    top: 0;
+    display: block;
+    height: 100svh;
+  }
+  .mh-auth-mobile-brand {
+    display: none;
+  }
+}

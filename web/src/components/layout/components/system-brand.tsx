@@ -19,6 +19,7 @@ For commercial licensing, please contact support@quantumnous.com
 import { Link } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 
+import { PixelWordmark } from '@/components/pixel-wordmark'
 import {
   SidebarMenu,
   SidebarMenuButton,
@@ -72,7 +73,7 @@ export function SystemBrand(props: SystemBrandProps) {
             className='size-full rounded-md object-cover'
           />
         </div>
-        <span className='max-w-[12rem] truncate'>{name}</span>
+        <PixelWordmark text={name} scale={2} className='max-w-[12rem]' />
       </Link>
     )
   }

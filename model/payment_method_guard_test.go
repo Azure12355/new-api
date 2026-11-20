@@ -1,12 +1,20 @@
 package model
 
 import (
+	"fmt"
+	"os"
 	"testing"
 	"time"
 
 	"github.com/QuantumNous/new-api/common"
+	"github.com/QuantumNous/new-api/setting/operation_setting"
+	"github.com/glebarez/sqlite"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"gorm.io/driver/mysql"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
+	"gorm.io/gorm/schema"
 )
 
 func insertUserForPaymentGuardTest(t *testing.T, id int, quota int) *User {
@@ -350,6 +358,103 @@ func TestRechargeEpayEnforcesFinalWalletQuotaLimit(t *testing.T) {
 			}
 			assert.Equal(t, tc.wantQuota, getUserQuotaForPaymentGuardTest(t, user.Id))
 			assert.Equal(t, tc.wantStatus, getTopUpStatusForPaymentGuardTest(t, order.TradeNo))
+		})
+	}
+}
+
+func TestStripeCnyRechargeDatabaseMatrix(t *testing.T) {
+	for _, dialect := range []string{"sqlite", "mysql", "postgres"} {
+		t.Run(dialect, func(t *testing.T) {
+			var driver gorm.Dialector
+			switch dialect {
+			case "sqlite":
+				driver = sqlite.Open(":memory:")
+			case "mysql":
+				dsn := os.Getenv("TEST_MYSQL_DSN")
+				if dsn == "" {
+					t.Skip("TEST_MYSQL_DSN is not configured")
+				}
+				driver = mysql.Open(dsn)
+			case "postgres":
+				dsn := os.Getenv("TEST_POSTGRES_DSN")
+				if dsn == "" {
+					t.Skip("TEST_POSTGRES_DSN is not configured")
+				}
+				driver = postgres.Open(dsn)
+			}
+			db, err := gorm.Open(driver, &gorm.Config{NamingStrategy: schema.NamingStrategy{TablePrefix: "stripe_cny_test_"}})
+			require.NoError(t, err)
+			sqlDB, err := db.DB()
+			require.NoError(t, err)
+			sqlDB.SetMaxOpenConns(1)
+			oldDB, oldLogDB := DB, LOG_DB
+			oldMainType, oldLogType := common.MainDatabaseType(), common.LogDatabaseType()
+			oldQuota, oldRate := common.QuotaPerUnit, operation_setting.Price
+			oldRedis, oldBatch := common.RedisEnabled, common.BatchUpdateEnabled
+			DB, LOG_DB = db, db
+			common.SetDatabaseTypes(common.DatabaseType(dialect), common.DatabaseType(dialect))
+			initCol()
+			common.QuotaPerUnit, operation_setting.Price = 500000, 7.3
+			common.RedisEnabled, common.BatchUpdateEnabled = false, false
+			tables := []any{&User{}, &TopUp{}, &Log{}}
+			t.Cleanup(func() {
+				assert.NoError(t, db.Migrator().DropTable(tables...))
+				DB, LOG_DB = oldDB, oldLogDB
+				common.SetDatabaseTypes(oldMainType, oldLogType)
+				initCol()
+				common.QuotaPerUnit, operation_setting.Price = oldQuota, oldRate
+				common.RedisEnabled, common.BatchUpdateEnabled = oldRedis, oldBatch
+				assert.NoError(t, sqlDB.Close())
+			})
+			require.NoError(t, db.AutoMigrate(tables...))
+			versionQuery := "SELECT version()"
+			if dialect == "sqlite" {
+				versionQuery = "SELECT sqlite_version()"
+			}
+			var version string
+			require.NoError(t, db.Raw(versionQuery).Scan(&version).Error)
+			t.Logf("database=%s version=%s", dialect, version)
+			for i, tc := range []struct {
+				amount int64
+				money  float64
+				quota  int
+			}{
+				{10, 1.36986301369863, 684932},
+				{50, 6.8493150684931505, 3424658},
+				{200, 27.397260273972602, 13698630},
+				{500, 68.4931506849315, 34246575},
+				{50, 10.273972602739725, 5136986},
+			} {
+				t.Run(fmt.Sprintf("case_%d", i), func(t *testing.T) {
+					user := User{Username: fmt.Sprintf("stripe-cny-user-%d", i), AffCode: fmt.Sprintf("cny-%d", i), Status: common.UserStatusEnabled, Quota: 7}
+					require.NoError(t, db.Create(&user).Error)
+					order := TopUp{UserId: user.Id, Amount: tc.amount, Money: tc.money, TradeNo: fmt.Sprintf("stripe-cny-order-%d", i), PaymentMethod: PaymentMethodStripeCny, PaymentProvider: PaymentProviderStripe, Status: common.TopUpStatusPending}
+					require.NoError(t, order.Insert())
+					stored := GetTopUpByTradeNo(order.TradeNo)
+					require.NotNil(t, stored)
+					assert.Equal(t, tc.money, stored.Money)
+					// Orders retain their original credit even if the configured exchange rate changes.
+					operation_setting.Price = 9.9
+					require.NoError(t, Recharge(order.TradeNo, "cus_cny_fixture", "127.0.0.1"))
+					assert.Equal(t, 7+tc.quota, getUserQuotaForPaymentGuardTest(t, user.Id))
+					stored = GetTopUpByTradeNo(order.TradeNo)
+					require.NotNil(t, stored)
+					assert.Equal(t, common.TopUpStatusSuccess, stored.Status)
+					assert.Equal(t, PaymentMethodStripeCny, stored.PaymentMethod)
+					require.NoError(t, db.First(&user, user.Id).Error)
+					assert.Equal(t, "cus_cny_fixture", user.StripeCustomer)
+					require.Error(t, Recharge(order.TradeNo, "cus_cny_fixture", "127.0.0.1"))
+					assert.Equal(t, 7+tc.quota, getUserQuotaForPaymentGuardTest(t, user.Id))
+					order.Id, order.TradeNo, order.Status = 0, order.TradeNo+"-manual", common.TopUpStatusPending
+					require.NoError(t, order.Insert())
+					require.NoError(t, ManualCompleteTopUp(order.TradeNo, "127.0.0.1"))
+					assert.Equal(t, 7+2*tc.quota, getUserQuotaForPaymentGuardTest(t, user.Id))
+					order.Id, order.TradeNo, order.Status = 0, order.TradeNo+"-expire", common.TopUpStatusPending
+					require.NoError(t, order.Insert())
+					require.NoError(t, UpdatePendingTopUpStatus(order.TradeNo, PaymentProviderStripe, common.TopUpStatusExpired))
+					assert.Equal(t, common.TopUpStatusExpired, getTopUpStatusForPaymentGuardTest(t, order.TradeNo))
+				})
+			}
 		})
 	}
 }

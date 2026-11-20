@@ -72,6 +72,12 @@ interface RechargeFormCardProps {
   loading?: boolean
   priceRatio?: number
   usdExchangeRate?: number
+  /**
+   * Model Hub: Stripe (USD, $1 per $1 of credit) is the only gateway, so
+   * amounts are shown in dollars with a $ sign instead of the quota display
+   * currency.
+   */
+  usdPricing?: boolean
   onOpenBilling?: () => void
   creemProducts?: CreemProduct[]
   enableCreemTopup?: boolean
@@ -102,6 +108,7 @@ export function RechargeFormCard({
   loading,
   priceRatio = 1,
   usdExchangeRate = 1,
+  usdPricing = false,
   onOpenBilling,
   creemProducts,
   enableCreemTopup,
@@ -243,6 +250,12 @@ export function RechargeFormCard({
                         discount,
                         usdExchangeRate
                       )
+                      // Stripe USD charges exactly $1 per $1 of credit
+                      const payLabel = usdPricing
+                        ? `$${formatCurrency(preset.value)}`
+                        : formatCurrency(actualPrice)
+                      const showSavings =
+                        !usdPricing && hasDiscount && savedAmount > 0
                       return (
                         <Button
                           key={preset.value}
@@ -257,16 +270,18 @@ export function RechargeFormCard({
                         >
                           <div className='flex w-full items-center justify-between'>
                             <div className='text-base font-semibold sm:text-lg'>
-                              {formatNumber(displayValue)}
+                              {usdPricing
+                                ? `$${formatNumber(preset.value)}`
+                                : formatNumber(displayValue)}
                             </div>
-                            {hasDiscount && (
+                            {hasDiscount && !usdPricing && (
                               <div className='text-xs font-medium text-green-600'>
                                 {getDiscountLabel(discount, t)}
                               </div>
                             )}
                           </div>
                           <div className='text-muted-foreground mt-1.5 w-full text-xs sm:mt-2'>
-                            {hasDiscount && savedAmount > 0 ? (
+                            {showSavings ? (
                               <Trans
                                 t={t}
                                 i18nKey='Pay {{amount}} <savings>• Save {{saved}}</savings>'
@@ -279,9 +294,7 @@ export function RechargeFormCard({
                                 }}
                               />
                             ) : (
-                              t('Pay {{amount}}', {
-                                amount: formatCurrency(actualPrice),
-                              })
+                              t('Pay {{amount}}', { amount: payLabel })
                             )}
                           </div>
                         </Button>
@@ -305,7 +318,9 @@ export function RechargeFormCard({
                     value={localAmount}
                     onChange={(e) => handleAmountChange(e.target.value)}
                     min={minTopup}
-                    placeholder={t('Minimum {{amount}}', { amount: minTopup })}
+                    placeholder={t('Minimum {{amount}}', {
+                      amount: usdPricing ? `$${minTopup}` : minTopup,
+                    })}
                     className='h-9 text-base sm:h-10 sm:text-lg'
                   />
                   <div className='bg-muted/30 flex min-h-9 items-center justify-between gap-2 rounded-md border px-3 lg:min-w-52'>
@@ -316,6 +331,7 @@ export function RechargeFormCard({
                       <Skeleton className='h-5 w-16' />
                     ) : (
                       <span className='text-sm font-semibold'>
+                        {usdPricing ? '$' : ''}
                         {formatCurrency(paymentAmount)}
                       </span>
                     )}

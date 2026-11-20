@@ -1,0 +1,49 @@
+# Model Hub
+
+> Model Hub（https://model-hub.org）是一个平价好用的大模型 API 中转平台：一个 Base URL、一个 API Key 调用 Claude、DeepSeek 等模型，兼容 OpenAI 与 Anthropic 接口格式，按 token 计费，注册即送免费体验额度。
+> Model Hub is an affordable AI model API gateway: one OpenAI- and Anthropic-compatible base URL for Claude, DeepSeek and more, billed per token, with free credits at sign-up.
+
+更新日期 / Last updated: 2026-11-19
+
+## 主要页面 / Main pages
+
+- [首页 / Home (中文)](https://model-hub.org/?lang=zh-CN): 产品介绍、快速开始、常见问题
+- [Home (English)](https://model-hub.org/): overview, quickstart and FAQ
+- [模型广场 / Model square](https://model-hub.org/pricing): 全部可用模型及输入、输出单价
+- [模型排行 / Rankings](https://model-hub.org/rankings): 模型使用排行
+- [免费注册 / Sign up](https://model-hub.org/sign-up): 注册领取免费额度并创建 API Key
+- [API 文档 / API docs](https://docs.newapi.ai/zh/docs/api): 接口说明
+
+## 关键信息 / Key facts
+
+- API Base URL（OpenAI 格式）: https://api.model-hub.org/v1 （/v1/chat/completions）
+- Anthropic 格式: https://api.model-hub.org/v1/messages ；Claude Code 使用 ANTHROPIC_BASE_URL=https://api.model-hub.org
+- 热门模型: claude-opus-5-5, claude-opus-5, claude-sonnet-5, claude-opus-4-8, claude-opus-4-7, claude-sonnet-4-6, claude-opus-4-6, claude-sonnet-4-5-20250929, claude-haiku-4-5-20251001, deepseek-v4-pro, deepseek-flash
+- 计费: 按实际 token 用量计费，各模型单价公开在模型广场；充值按 ¥7.3 = $1 额度换算
+- 免费额度: 新用户注册即送免费体验额度，并不定期发放优惠额度和充值赠送（以控制台和站内公告为准）
+- 稳定性: 每个模型配置多条上游渠道，出错自动重试到其他线路
+- 令牌管理: 每个 API Key 可单独设置额度上限、过期时间和可用模型
+- 兼容工具: Claude Code、Cursor、Cline、Cherry Studio、LobeChat、Dify、n8n、LangChain、OpenAI SDK、Anthropic SDK
+
+## 常见问题 / FAQ
+
+### Model Hub 是什么？
+Model Hub 是一个大模型 API 中转平台。用一个 Base URL 和一个 API Key，就能调用 Claude、DeepSeek 等模型，OpenAI 和 Anthropic 两种请求格式都支持；令牌、余额和用量都在同一个控制台管理。
+
+### 价格怎么样？怎么计费？
+按实际 token 用量计费，用多少扣多少。每个模型的输入、输出单价都公开在模型广场，充值按 ¥7.3 = $1 额度换算。
+
+### 有免费额度吗？
+有。新用户注册后即可领取免费体验额度，用来测试模型和接入；平台也会不定期发放优惠额度和充值赠送，当前活动以控制台和站内公告为准。
+
+### 怎么在 Claude Code 里使用 Model Hub？
+设置环境变量 ANTHROPIC_BASE_URL=https://api.model-hub.org 和 ANTHROPIC_AUTH_TOKEN=你的 Model Hub 令牌，然后运行 claude；也可以用 ANTHROPIC_MODEL 指定模型。
+
+### 兼容 OpenAI SDK 吗？
+兼容。把 base_url 改成 https://api.model-hub.org/v1，api_key 换成 Model Hub 令牌即可；同时支持 Anthropic 的 /v1/messages 格式。
+
+### 支持流式输出吗？
+支持。请求里加上 stream: true，就会以 SSE 流式返回。
+
+### 怎么开始使用？
+注册账号并在控制台创建 API Key，把客户端的 Base URL 改成 https://api.model-hub.org/v1，再从模型广场选一个模型 ID 填进去即可。
