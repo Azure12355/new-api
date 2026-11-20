@@ -17,6 +17,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 import { queryOptions, type QueryClient } from '@tanstack/react-query'
+import i18next from 'i18next'
 
 import { getStatus } from '@/lib/api'
 import { DEFAULT_SYSTEM_NAME, DEFAULT_LOGO } from '@/lib/constants'
@@ -58,6 +59,42 @@ function toNumber(value: unknown, fallback: number): number {
 }
 
 /**
+ * Model Hub: amounts follow the interface language. A site configured to show
+ * CNY shows it to Chinese interfaces and USD to every other language; other
+ * display types are used as configured.
+ */
+export function displayTypeForLanguage(
+  siteType: CurrencyDisplayType,
+  language: string | undefined
+): CurrencyDisplayType {
+  if (siteType === 'CNY' && !(language ?? '').startsWith('zh')) return 'USD'
+  return siteType
+}
+
+/**
+ * Re-derive the displayed currency when the interface language changes.
+ * Registered once from main.tsx so tests do not pick up the global listener.
+ */
+export function syncCurrencyWithLanguage(): () => void {
+  const onLanguageChanged = (language: string) => {
+    const { config, setConfig } = useSystemConfigStore.getState()
+    const siteType =
+      config.currency.siteQuotaDisplayType ?? config.currency.quotaDisplayType
+    const next = displayTypeForLanguage(siteType, language)
+    if (next === config.currency.quotaDisplayType) return
+    setConfig({
+      currency: {
+        ...config.currency,
+        siteQuotaDisplayType: siteType,
+        quotaDisplayType: next,
+      },
+    })
+  }
+  i18next.on('languageChanged', onLanguageChanged)
+  return () => i18next.off('languageChanged', onLanguageChanged)
+}
+
+/**
  * Map `/api/status` response data to our persisted system config structure
  */
 export function mapStatusDataToConfig(
@@ -65,15 +102,20 @@ export function mapStatusDataToConfig(
 ): Partial<SystemConfig> {
   if (!data) return {}
 
-  const quotaDisplayType =
+  const siteQuotaDisplayType =
     (data.quota_display_type as CurrencyDisplayType | undefined) ??
     DEFAULT_CURRENCY_CONFIG.quotaDisplayType
+  const quotaDisplayType = displayTypeForLanguage(
+    siteQuotaDisplayType,
+    i18next.resolvedLanguage || i18next.language
+  )
 
   const currency: CurrencyConfig = {
     displayInCurrency:
       (data.display_in_currency as boolean | undefined) ??
       DEFAULT_CURRENCY_CONFIG.displayInCurrency,
     quotaDisplayType,
+    siteQuotaDisplayType,
     quotaPerUnit: toNumber(
       data.quota_per_unit,
       DEFAULT_CURRENCY_CONFIG.quotaPerUnit

@@ -26,8 +26,14 @@ export type CurrencyDisplayType = 'USD' | 'CNY' | 'TOKENS' | 'CUSTOM'
 export interface CurrencyConfig {
   /** Whether to render quota values as currency instead of raw units */
   displayInCurrency: boolean
-  /** Currency presentation strategy configured by the admin */
+  /** Currency presentation strategy in effect (see siteQuotaDisplayType) */
   quotaDisplayType: CurrencyDisplayType
+  /**
+   * Model Hub: the strategy configured by the admin. quotaDisplayType is
+   * derived from it per interface language (CNY sites show USD to
+   * non-Chinese languages).
+   */
+  siteQuotaDisplayType?: CurrencyDisplayType
   /** Number of quota units that equal one USD */
   quotaPerUnit: number
   /** Exchange rate from USD to the configured local currency */
