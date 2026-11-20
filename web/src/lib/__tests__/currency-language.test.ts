@@ -17,70 +17,43 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 import i18next from 'i18next'
-import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
+import { afterEach, expect, it } from 'vitest'
 
+import { getSitePricingCurrency } from '@/features/model-pricing/currency'
 import { formatCurrencyFromUSD } from '@/lib/currency'
-import {
-  displayTypeForLanguage,
-  syncCurrencyWithLanguage,
-} from '@/lib/status-query'
+import { mapStatusDataToConfig, syncPricingCurrency } from '@/lib/status-query'
+import { usePricingPreferencesStore } from '@/stores/pricing-preferences-store'
 import {
   DEFAULT_CURRENCY_CONFIG,
   useSystemConfigStore,
 } from '@/stores/system-config-store'
 
-let stopSync: () => void
-beforeAll(() => {
-  stopSync = syncCurrencyWithLanguage()
-})
-afterAll(() => stopSync())
-
-afterEach(async () => {
-  useSystemConfigStore.getState().setConfig({
-    currency: { ...DEFAULT_CURRENCY_CONFIG },
-  })
-  await i18next.changeLanguage('en')
+afterEach(() => {
+  usePricingPreferencesStore.getState().setCurrency('USD')
+  useSystemConfigStore
+    .getState()
+    .setConfig({ currency: DEFAULT_CURRENCY_CONFIG })
 })
 
-describe('displayTypeForLanguage', () => {
-  it.each([
-    ['CNY', 'zhCN', 'CNY'],
-    ['CNY', 'zhTW', 'CNY'],
-    ['CNY', 'en', 'USD'],
-    ['CNY', 'ja', 'USD'],
-    ['CNY', undefined, 'USD'],
-    ['USD', 'zhCN', 'USD'],
-    ['TOKENS', 'en', 'TOKENS'],
-    ['CUSTOM', 'en', 'CUSTOM'],
-  ] as const)('site %s in language %s shows %s', (site, language, shown) => {
-    expect(displayTypeForLanguage(site, language)).toBe(shown)
-  })
-})
-
-describe('language switch on a CNY site', () => {
-  it('shows ¥ in Chinese and $ in English for the same balance', async () => {
+it('keeps USD prices across languages and converts only on explicit currency selection', async () => {
+  const stop = syncPricingCurrency()
+  try {
     await i18next.init({ lng: 'zhCN', resources: {} })
-    useSystemConfigStore.getState().setConfig({
-      currency: {
-        ...DEFAULT_CURRENCY_CONFIG,
-        displayInCurrency: true,
-        quotaDisplayType: 'CNY',
-        siteQuotaDisplayType: 'CNY',
-        usdExchangeRate: 7.3,
-      },
-    })
-    expect(formatCurrencyFromUSD(10)).toContain('¥')
-    expect(formatCurrencyFromUSD(10)).toContain('73')
-
-    await i18next.changeLanguage('en')
+    const status = { quota_display_type: 'CNY', usd_exchange_rate: 7.3 }
+    useSystemConfigStore.getState().setConfig(mapStatusDataToConfig(status))
+    expect(formatCurrencyFromUSD(4)).toContain('$4')
     expect(
-      useSystemConfigStore.getState().config.currency.quotaDisplayType
-    ).toBe('USD')
-    expect(formatCurrencyFromUSD(10)).toContain('$10')
-
-    await i18next.changeLanguage('zhCN')
-    expect(
-      useSystemConfigStore.getState().config.currency.quotaDisplayType
+      getSitePricingCurrency(useSystemConfigStore.getState().config.currency)
+        ?.label
     ).toBe('CNY')
-  })
+    usePricingPreferencesStore.getState().setCurrency('site')
+    expect(formatCurrencyFromUSD(4)).toContain('¥29.2')
+    await i18next.changeLanguage('en')
+    useSystemConfigStore.getState().setConfig(mapStatusDataToConfig(status))
+    expect(formatCurrencyFromUSD(4)).toContain('¥29.2')
+    usePricingPreferencesStore.getState().setCurrency('USD')
+    expect(formatCurrencyFromUSD(20)).toContain('$20')
+  } finally {
+    stop()
+  }
 })

@@ -28,11 +28,7 @@ export interface CurrencyConfig {
   displayInCurrency: boolean
   /** Currency presentation strategy in effect (see siteQuotaDisplayType) */
   quotaDisplayType: CurrencyDisplayType
-  /**
-   * Model Hub: the strategy configured by the admin. quotaDisplayType is
-   * derived from it per interface language (CNY sites show USD to
-   * non-Chinese languages).
-   */
+  /** Site currency available for explicit selection in the pricing editor. */
   siteQuotaDisplayType?: CurrencyDisplayType
   /** Number of quota units that equal one USD */
   quotaPerUnit: number

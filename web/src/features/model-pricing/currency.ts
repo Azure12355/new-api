@@ -34,10 +34,11 @@ export const USD_PRICING_CURRENCY: PricingCurrency = {
 export function getSitePricingCurrency(
   config: CurrencyConfig
 ): PricingCurrency | null {
-  if (config.quotaDisplayType === 'CNY') {
+  const siteType = config.siteQuotaDisplayType ?? config.quotaDisplayType
+  if (siteType === 'CNY') {
     return { label: 'CNY', symbol: '¥', exchangeRate: config.usdExchangeRate }
   }
-  if (config.quotaDisplayType === 'CUSTOM') {
+  if (siteType === 'CUSTOM') {
     const symbol = config.customCurrencySymbol?.trim() || '¤'
     return {
       label: symbol,

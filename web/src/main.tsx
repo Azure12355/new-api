@@ -29,7 +29,7 @@ import { createAppQueryClient } from '@/lib/query-client'
 import {
   readCachedStatus,
   statusQueryOptions,
-  syncCurrencyWithLanguage,
+  syncPricingCurrency,
 } from '@/lib/status-query'
 
 import { DirectionProvider } from './context/direction-provider'
@@ -46,7 +46,7 @@ import './styles/index.css'
 // VChart theme is driven by our ThemeProvider (html.light/html.dark) via per-chart `theme` prop.
 initializeFrontendCache()
 installBuildMetadata()
-syncCurrencyWithLanguage()
+syncPricingCurrency()
 
 const queryClient = createAppQueryClient(() => {
   void router.navigate({ to: '/500' })

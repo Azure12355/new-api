@@ -17,10 +17,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 import { queryOptions, type QueryClient } from '@tanstack/react-query'
-import i18next from 'i18next'
 
 import { getStatus } from '@/lib/api'
 import { DEFAULT_SYSTEM_NAME, DEFAULT_LOGO } from '@/lib/constants'
+import { usePricingPreferencesStore } from '@/stores/pricing-preferences-store'
 import {
   useSystemConfigStore,
   type CurrencyConfig,
@@ -58,40 +58,40 @@ function toNumber(value: unknown, fallback: number): number {
   return fallback
 }
 
-/**
- * Model Hub: amounts follow the interface language. A site configured to show
- * CNY shows it to Chinese interfaces and USD to every other language; other
- * display types are used as configured.
- */
-export function displayTypeForLanguage(
-  siteType: CurrencyDisplayType,
-  language: string | undefined
-): CurrencyDisplayType {
-  if (siteType === 'CNY' && !(language ?? '').startsWith('zh')) return 'USD'
-  return siteType
+function pricingDisplayType(currency: CurrencyConfig): CurrencyDisplayType {
+  const siteType = currency.siteQuotaDisplayType ?? currency.quotaDisplayType
+  if (siteType === 'USD' || siteType === 'TOKENS') return siteType
+  const rate =
+    siteType === 'CNY'
+      ? currency.usdExchangeRate
+      : currency.customCurrencyExchangeRate
+  return usePricingPreferencesStore.getState().currency === 'site' &&
+    Number.isFinite(rate) &&
+    rate > 0
+    ? siteType
+    : 'USD'
 }
 
-/**
- * Re-derive the displayed currency when the interface language changes.
- * Registered once from main.tsx so tests do not pick up the global listener.
- */
-export function syncCurrencyWithLanguage(): () => void {
-  const onLanguageChanged = (language: string) => {
-    const { config, setConfig } = useSystemConfigStore.getState()
-    const siteType =
-      config.currency.siteQuotaDisplayType ?? config.currency.quotaDisplayType
-    const next = displayTypeForLanguage(siteType, language)
-    if (next === config.currency.quotaDisplayType) return
-    setConfig({
-      currency: {
-        ...config.currency,
-        siteQuotaDisplayType: siteType,
-        quotaDisplayType: next,
-      },
-    })
+export function syncPricingCurrency(): () => void {
+  const sync = () => {
+    const {
+      config: { currency },
+      setConfig,
+    } = useSystemConfigStore.getState()
+    const quotaDisplayType = pricingDisplayType(currency)
+    if (quotaDisplayType !== currency.quotaDisplayType) {
+      setConfig({
+        currency: {
+          ...currency,
+          siteQuotaDisplayType:
+            currency.siteQuotaDisplayType ?? currency.quotaDisplayType,
+          quotaDisplayType,
+        },
+      })
+    }
   }
-  i18next.on('languageChanged', onLanguageChanged)
-  return () => i18next.off('languageChanged', onLanguageChanged)
+  sync()
+  return usePricingPreferencesStore.subscribe(sync)
 }
 
 /**
@@ -105,16 +105,11 @@ export function mapStatusDataToConfig(
   const siteQuotaDisplayType =
     (data.quota_display_type as CurrencyDisplayType | undefined) ??
     DEFAULT_CURRENCY_CONFIG.quotaDisplayType
-  const quotaDisplayType = displayTypeForLanguage(
-    siteQuotaDisplayType,
-    i18next.resolvedLanguage || i18next.language
-  )
-
   const currency: CurrencyConfig = {
     displayInCurrency:
       (data.display_in_currency as boolean | undefined) ??
       DEFAULT_CURRENCY_CONFIG.displayInCurrency,
-    quotaDisplayType,
+    quotaDisplayType: siteQuotaDisplayType,
     siteQuotaDisplayType,
     quotaPerUnit: toNumber(
       data.quota_per_unit,
@@ -141,7 +136,7 @@ export function mapStatusDataToConfig(
     displayTokenStatEnabled: data.display_token_stat_enabled as
       | boolean
       | undefined,
-    currency,
+    currency: { ...currency, quotaDisplayType: pricingDisplayType(currency) },
   }
 }
 
