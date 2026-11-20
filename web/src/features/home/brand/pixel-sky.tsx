@@ -34,7 +34,7 @@ float noise(vec2 p){ vec2 i = floor(p), f = fract(p); vec2 u = f*f*(3.-2.*f);
   return mix(mix(hash(i), hash(i+vec2(1.,0.)), u.x), mix(hash(i+vec2(0.,1.)), hash(i+vec2(1.,1.)), u.x), u.y); }
 float fbm(vec2 p){ float v = 0., a = .5; for (int i = 0; i < 4; i++){ v += a*noise(p); p = p*2.02 + 13.7; a *= .5; } return v; }
 float crest(float k, float x, float tt){
-  float b = mix(.13, .33, smoothstep(0., 1.1, x)) - k*.075;
+  float b = mix(.09, .33, smoothstep(0., 1.1, x)) - k*.075;
   float a = .05 - k*.007;
   return b + a*sin(x*(5.2 + k*1.7) + tt*(.55 - k*.12) + k*2.1)
            + a*.6*sin(x*(11. + k*2.3) - tt*(.42 + k*.1) + k)

@@ -64,6 +64,12 @@ export function BrandHero(props: BrandHeroProps) {
                 {t('{{count}} models', { count: props.modelCount })}
               </span>
             </p>
+            <p className='mh-sh-promise'>
+              <span className='mh-sh-yen' aria-hidden>
+                ¥
+              </span>
+              {t('Whatever price you need, we have it!')}
+            </p>
           </div>
 
           <div className='mh-side'>

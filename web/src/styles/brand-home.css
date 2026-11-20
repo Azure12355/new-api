@@ -339,6 +339,47 @@
   color: #120d3f;
   white-space: nowrap;
 }
+.mh-sh-promise {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 18px;
+  font-size: clamp(16px, 1.6vw, 22px);
+  font-weight: 700;
+  color: #ffd9b8;
+}
+.mh-sh-yen {
+  display: inline-grid;
+  place-items: center;
+  width: 1.5em;
+  height: 1.5em;
+  flex: none;
+  background: #ff7a00;
+  color: #120d3f;
+  font-weight: 900;
+  box-shadow: 0.14em 0.14em 0 #120d3f;
+  transform: rotate(-6deg);
+}
+/* when the sticker wraps onto its own line (phones, narrow panel), leave room
+   above it for the orange tag so the tag does not cover line 1 */
+@media (max-width: 760px) {
+  .mh-sh,
+  .mh-sh[data-lang='zh'] {
+    line-height: 1.3;
+  }
+  .mh-sh-sticker {
+    margin-top: 0.62em;
+    margin-left: 0;
+  }
+  .mh-sh-line + .mh-sh-line,
+  .mh-sh .sr-only + .mh-sh-line {
+    margin-top: 0.2em;
+  }
+}
+.mh-sh-panel[data-lang='en'] .mh-sh-sticker {
+  margin-top: 0.62em;
+  margin-left: 0;
+}
 .mh-sh-panel,
 .mh-sh-panel[data-lang='zh'] {
   margin-top: 30px;

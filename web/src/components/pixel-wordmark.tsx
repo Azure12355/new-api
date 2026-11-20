@@ -71,6 +71,8 @@ const ROWS = 7
 const GLYPH_W = 5
 const SPACE_W = 3
 const GAP = 1
+/** Each font pixel is drawn this many units wide, which makes the strokes bold. */
+const STROKE = 2
 
 interface PixelWordmarkProps {
   text: string
@@ -104,10 +106,12 @@ export function PixelWordmark(props: PixelWordmarkProps) {
     }
     GLYPHS[c].forEach((row, y) => {
       for (let col = 0; col < GLYPH_W; col++) {
-        if (row[col] === '1') path += `M${x + col} ${y}h1v1h-1z`
+        if (row[col] === '1') {
+          path += `M${x + col} ${y}h${STROKE}v1h-${STROKE}z`
+        }
       }
     })
-    x += GLYPH_W
+    x += GLYPH_W + STROKE - 1
   })
   const accentX = x + GAP
   const width = accentX + 1
