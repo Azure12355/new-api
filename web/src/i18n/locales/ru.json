@@ -2388,6 +2388,7 @@
     "Endpoint": "Точка доступа",
     "Endpoint config": "Конфигурация конечной точки",
     "Endpoint Configuration": "Конфигурация конечной точки",
+    "API use case": "Назначение API",
     "Endpoint Type": "Тип конечной точки",
     "Endpoint, provider-specific settings, and credentials.": "Эндпоинт, настройки провайдера и учетные данные.",
     "Endpoint:": "Конечная точка:",

@@ -22,6 +22,7 @@ import {
   QUOTA_TYPES,
   QUOTA_TYPE_VALUES,
   ENDPOINT_TYPES,
+  type EndpointTypeOption,
   type QuotaTypeOption,
   type SortOption,
 } from '../constants'
@@ -128,6 +129,56 @@ export function filterByQuotaType(
   return models.filter((model) => getModelQuotaType(model) === quotaType)
 }
 
+// Channel-wide protocol defaults also appear on task models. Classify their
+// public use separately from the concrete protocols shown in the API tab.
+export function getEndpointCategories(
+  model: PricingModel
+): EndpointTypeOption[] {
+  const types = ENDPOINT_TYPES
+  const categories = new Set<EndpointTypeOption>()
+  const endpoints = model.supported_endpoint_types ?? []
+  for (const id of [
+    types.EMBEDDINGS,
+    types.JINA_RERANK,
+    types.IMAGE_GENERATION,
+    types.OPENAI_VIDEO,
+  ]) {
+    if (endpoints.includes(id)) categories.add(id)
+  }
+  const tagCategories: Record<string, EndpointTypeOption> = {
+    向量嵌入: types.EMBEDDINGS,
+    检索重排: types.JINA_RERANK,
+    图像: types.IMAGE_GENERATION,
+    图像生成: types.IMAGE_GENERATION,
+    视频: types.OPENAI_VIDEO,
+    视频生成: types.OPENAI_VIDEO,
+    语音合成: types.AUDIO,
+    语音转写: types.AUDIO,
+    实时语音: types.AUDIO,
+    音频: types.AUDIO,
+    检索工具: types.SEARCH,
+    三维生成: types.OTHER,
+  }
+  for (const tag of parseTags(model.tags)) {
+    if (tagCategories[tag]) categories.add(tagCategories[tag])
+  }
+  if (categories.size > 0) return [...categories]
+  if (
+    endpoints.some((id) =>
+      [
+        'openai',
+        'openai-response',
+        'openai-response-compact',
+        'anthropic',
+        'gemini',
+      ].includes(id)
+    )
+  )
+    return [types.OPENAI]
+  if (endpoints.includes('openai-alpha-search')) return [types.SEARCH]
+  return endpoints.length ? [types.OTHER] : []
+}
+
 /**
  * Filter models by endpoint type
  */
@@ -136,8 +187,13 @@ export function filterByEndpointType(
   endpointType: string
 ): PricingModel[] {
   if (endpointType === ENDPOINT_TYPES.ALL) return models
-  return models.filter((m) =>
-    m.supported_endpoint_types?.includes(endpointType)
+  if (!Object.values<string>(ENDPOINT_TYPES).includes(endpointType)) {
+    return models.filter((model) =>
+      model.supported_endpoint_types?.includes(endpointType)
+    )
+  }
+  return models.filter((model) =>
+    getEndpointCategories(model).some((id) => id === endpointType)
   )
 }
 

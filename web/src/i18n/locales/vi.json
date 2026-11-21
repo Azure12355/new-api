@@ -2388,6 +2388,7 @@
     "Endpoint": "Endpoint",
     "Endpoint config": "Cấu hình điểm cuối",
     "Endpoint Configuration": "Cấu hình điểm cuối",
+    "API use case": "Mục đích sử dụng API",
     "Endpoint Type": "Loại điểm cuối",
     "Endpoint, provider-specific settings, and credentials.": "Endpoint, cài đặt riêng của nhà cung cấp và thông tin xác thực.",
     "Endpoint:": "Điểm cuối:",

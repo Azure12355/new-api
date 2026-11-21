@@ -278,7 +278,7 @@ describe('model cards', () => {
     )
 
     const groupField = screen.getByText('Groups').parentElement
-    const endpointField = screen.getByText('Endpoints').parentElement
+    const endpointField = screen.getByText('API use case').parentElement
     if (!groupField || !endpointField) {
       throw new Error('Expected labeled group and endpoint fields')
     }
@@ -288,10 +288,8 @@ describe('model cards', () => {
       'title',
       groups.slice(1).join(', ')
     )
-    expect(
-      within(endpointField).getByText('openai-response, openai')
-    ).toHaveAttribute('title', endpoints.join(', '))
-    expect(within(endpointField).getByText('+3')).toBeVisible()
+    expect(within(endpointField).getByText('Chat')).toBeVisible()
+    expect(within(endpointField).queryByText('+3')).toBeNull()
     expect(
       within(tagField).getByText('video-generation, high-resolution')
     ).toHaveAttribute('title', tags.join(', '))
@@ -311,7 +309,7 @@ describe('model cards', () => {
       />
     )
     expect(screen.queryByText('Groups')).not.toBeInTheDocument()
-    expect(screen.queryByText('Endpoints')).not.toBeInTheDocument()
+    expect(screen.queryByText('API use case')).not.toBeInTheDocument()
     expect(
       screen.queryByRole('group', { name: 'Tags' })
     ).not.toBeInTheDocument()

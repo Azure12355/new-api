@@ -27,7 +27,7 @@ import { getLobeIcon } from '@/lib/lobe-icon'
 import { cn } from '@/lib/utils'
 import { useSystemConfigStore } from '@/stores/system-config-store'
 
-import { DEFAULT_TOKEN_UNIT } from '../constants'
+import { DEFAULT_TOKEN_UNIT, getEndpointTypeLabels } from '../constants'
 import { useBillingTime } from '../hooks/use-billing-time'
 import {
   getCardExamplePrice,
@@ -36,7 +36,7 @@ import {
   getDynamicPricingSummary,
   isUnconfiguredTaskUsageModel,
 } from '../lib/dynamic-price'
-import { parseTags } from '../lib/filters'
+import { getEndpointCategories, parseTags } from '../lib/filters'
 import { isTokenBasedModel } from '../lib/model-helpers'
 import { withBasePricing } from '../lib/plugin-pricing'
 import { formatPrice, formatRequestPrice } from '../lib/price'
@@ -68,7 +68,10 @@ export const ModelCard = memo(function ModelCard(props: ModelCardProps) {
   const tokenUnitLabel = tokenUnit === 'K' ? '1K' : '1M'
   const tags = parseTags(props.model.tags)
   const groups = props.model.enable_groups || []
-  const endpoints = props.model.supported_endpoint_types || []
+  const endpointLabels = getEndpointTypeLabels(t)
+  const endpoints = getEndpointCategories(props.model).map(
+    (id) => endpointLabels[id]
+  )
   const modelIconKey = props.model.icon || props.model.vendor_icon
   const modelIcon = modelIconKey ? getLobeIcon(modelIconKey, 28) : null
   const initial = props.model.model_name?.charAt(0).toUpperCase() || '?'
@@ -377,7 +380,7 @@ export const ModelCard = memo(function ModelCard(props: ModelCardProps) {
             {endpoints.length > 0 && (
               <div className='flex min-w-0 items-baseline gap-1.5'>
                 <dt className='text-muted-foreground shrink-0'>
-                  {t('Endpoints')}
+                  {t('API use case')}
                 </dt>
                 <dd className='flex min-w-0 items-baseline gap-1'>
                   <span className='truncate' title={endpoints.join(', ')}>

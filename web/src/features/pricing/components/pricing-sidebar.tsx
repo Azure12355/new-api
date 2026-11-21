@@ -37,7 +37,11 @@ import {
   getEndpointTypeLabels,
   getQuotaTypeLabels,
 } from '../constants'
-import { getModelQuotaType, parseTags } from '../lib/filters'
+import {
+  getEndpointCategories,
+  getModelQuotaType,
+  parseTags,
+} from '../lib/filters'
 import type { PricingModel, PricingVendor } from '../types'
 
 type FilterOption = {
@@ -168,7 +172,7 @@ export const PricingSidebar = memo(function PricingSidebar(
       )) {
         tags.set(tag, (tags.get(tag) ?? 0) + 1)
       }
-      for (const endpoint of new Set(model.supported_endpoint_types ?? [])) {
+      for (const endpoint of getEndpointCategories(model)) {
         endpoints.set(endpoint, (endpoints.get(endpoint) ?? 0) + 1)
       }
       const quotaType = getModelQuotaType(model)
@@ -250,7 +254,11 @@ export const PricingSidebar = memo(function PricingSidebar(
       count: props.models.length,
     },
     ...Object.entries(endpointTypeLabels)
-      .filter(([value]) => value !== ENDPOINT_TYPES.ALL)
+      .filter(
+        ([value]) =>
+          value !== ENDPOINT_TYPES.ALL &&
+          (counts.endpoints.has(value) || props.endpointTypeFilter === value)
+      )
       .map(([value, label]) => ({
         value,
         label,
@@ -312,7 +320,7 @@ export const PricingSidebar = memo(function PricingSidebar(
           onChange={props.onQuotaTypeChange}
         />
         <FilterSection
-          title={t('Endpoint Type')}
+          title={t('API use case')}
           value={props.endpointTypeFilter}
           options={endpointOptions}
           onChange={props.onEndpointTypeChange}

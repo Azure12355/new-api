@@ -2388,6 +2388,7 @@
     "Endpoint": "Point d'accès",
     "Endpoint config": "Configuration de l'endpoint",
     "Endpoint Configuration": "Configuration du point de terminaison",
+    "API use case": "Usage de l’API",
     "Endpoint Type": "Type de point de terminaison",
     "Endpoint, provider-specific settings, and credentials.": "Point de terminaison, paramètres propres au fournisseur et identifiants.",
     "Endpoint:": "Point de terminaison :",

@@ -28,7 +28,8 @@ import { GroupBadge } from '@/components/group-badge'
 import { StatusBadge } from '@/components/status-badge'
 import { getLobeIcon } from '@/lib/lobe-icon'
 
-import { parseTags } from '../lib/filters'
+import { getEndpointTypeLabels } from '../constants'
+import { getEndpointCategories, parseTags } from '../lib/filters'
 import type { PricingModel } from '../types'
 import { CachedPriceCell } from './cached-price-cell'
 import { ModelBillingModeBadge } from './model-billing-mode-badge'
@@ -161,15 +162,16 @@ export function usePricingColumns(
     // Endpoints column
     {
       accessorKey: 'supported_endpoint_types',
-      header: t('Endpoints'),
+      header: t('API use case'),
       cell: ({ row }) => {
-        const endpoints = row.original.supported_endpoint_types || []
+        const endpoints = getEndpointCategories(row.original)
+        const labels = getEndpointTypeLabels(t)
         return (
           <BadgeListCell
             items={endpoints.map((ep) => (
               <StatusBadge
                 key={ep}
-                label={ep}
+                label={labels[ep]}
                 autoColor={ep}
                 size='sm'
                 copyable={false}

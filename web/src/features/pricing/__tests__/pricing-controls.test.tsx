@@ -247,15 +247,15 @@ describe('pricing controls', () => {
         model_name: 'image-model',
         quota_type: 1,
         tags: 'chat,Image',
-        supported_endpoint_types: ['image-generation'],
+        supported_endpoint_types: ['image-generation', 'openai'],
       },
       {
         ...base,
         id: 3,
         model_name: 'task-model',
         vendor_name: 'Vendor B',
-        tags: 'Video',
-        supported_endpoint_types: ['openai-video'],
+        tags: '视频',
+        supported_endpoint_types: ['openai'],
         billing_usage_schema: { seconds: { type: 'number', unit: 'second' } },
       },
     ]
@@ -295,7 +295,7 @@ describe('pricing controls', () => {
     expect(screen.getByRole('button', { name: /^Vendor A\s*1$/ })).toBeVisible()
     expect(screen.queryByRole('button', { name: /^Vendor B\s*1$/ })).toBeNull()
     expect(screen.getByRole('button', { name: /^Chat\s*1$/ })).toBeVisible()
-    expect(screen.getByRole('button', { name: /^Chat\s*0$/ })).toBeVisible()
+    expect(screen.queryByRole('button', { name: /^Chat\s*0$/ })).toBeNull()
     expect(
       screen.getByRole('button', { name: /^Token-based\s*0$/ })
     ).toBeVisible()
